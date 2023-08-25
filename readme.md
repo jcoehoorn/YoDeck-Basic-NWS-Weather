@@ -15,9 +15,7 @@ To get local data, the NWS API needs three separate pieces of the information:
 2. The grid coordinates within that office's area of responsibility
 3. The station ID for the nearest weather station
 
-To find this information, start from Google Maps and right-click on your location. This will show you the lattitude and longitude coordinates, and if you click them will copy them to the clipboard.
-
-From here, you can visit the following address in a browser:
+To find this information, start from Google Maps and right-click on your location. This will show you lattitude and longitude coordinates, and if you click them it will copy them to the clipboard. From here, you can visit the following address in a browser:
 
 https://api.weather.gov/points/{lattitude,longitude_from_google}
 
