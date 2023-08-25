@@ -1,0 +1,30 @@
+{
+  "fields": [
+    "Station",
+    "Grid",
+	"Styles"
+  ],
+  "schema": {
+    "Station": {
+      "title": "Station ID",
+      "type": "Text",
+      "validators": [
+        "required"
+      ]
+    },
+    "Grid": {
+      "title": "Grid",
+      "type": "Text",
+      "validators": [
+        "required"
+      ]
+    },
+	"Styles": {
+		"editorAttrs": {
+			"height":"80px"
+		},
+		"title":"CSS Styles",
+		"type":"TextArea"
+	}
+  }
+}

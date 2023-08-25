@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+<title>Basic Weather</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@500;700&display=swap" rel="stylesheet">
+
+<script type="text/javascript">
+
+function curl(url)
+{
+	var wc = new XMLHttpRequest();
+	wc.open("GET", url, false);
+	wc.send();
+	return wc.responseText;
+}
+
+function getNWSConditionsJSON(station)
+{
+	var url = "https://api.weather.gov/stations/" + station + "/observations/latest";
+	var result = JSON.parse(curl(url));
+	
+	//force failed request for testing
+	// result.properties.temperature.value = null;
+	if (result.properties.temperature.value === null)
+    {
+		//TODO:
+		// 1. Get ALL observations
+		// 2. Look at each one until I find the most recent non-null 
+		//   (fortunately they come pre-sorted in the correct order)
+		// 3. Return that item
+		
+		url = "https://api.weather.gov/stations/" + station + "/observations";
+		result = JSON.parse(curl(url)).features;		
+		for(const ftr of result) {//TODO
+			if (ftr.properties.temperature.qualityControl === "Z" || ftr.properties.temperature.value === null) {
+				; //continue
+			} else {
+				return ftr;
+			}
+		}
+    }
+    return result;
+}
+
+function getNWSForecastJSON(office, grid)
+{
+   var url = "https://api.weather.gov/gridpoints/" + office + "/" + grid + "/forecast";
+   return JSON.parse(curl(url));
+}
+
+function alt(msg)
+{
+	var w = 300;
+	var h = 200;
+	
+	var p = document.createElement("p");	
+	p.width = w + "px";
+	p.height = h + "px";
+	p.style.border = "2px solid black";
+	p.style.position = "absolute";
+	p.style.width = w + "px";
+	p.style.height= h + "px";
+	p.style.display = "block";
+	p.style.top = ( (1080/2) - (h/2)) + "px";
+	p.style.left = ( (1920/2) - (w/2)) + "px";
+	p.innerHTML = msg;
+	
+	var body = document.body;
+	body.appendChild(p);
+}
+
+function CtoF(c)
+{
+	return Math.round(c * 1.8 + 32);
+}
+
+function wrapForecast(forecast) {
+	if (forecast.length > 34) forecast = forecast.replace(' And', '<br>And');
+	if (forecast.includes(" then") ) forecast = forecast.replace(" then", "<br>Then");
+	return forecast;
+}
+
+function init_widget(config) {
+	//alt(JSON.stringify(config));
+
+	var currentTemp   = document.getElementById("currentTemp");
+	var currentWeath  = document.getElementById("currentWeath");
+	var todayHigh     = document.getElementById("todayHigh");
+	var tonightLow    = document.getElementById("tonightLow");
+	var todayLabel    = document.getElementById("todayLabel");
+	var todayWeath    = document.getElementById("todayWeath");
+	var tomorrowHigh  = document.getElementById("tomorrowHigh");
+	var tomorrowLow   = document.getElementById("tomorrowLow");
+	var tomorrowWeath = document.getElementById("tomorrowWeath");
+	var nextDayHigh   = document.getElementById("nextDayHigh");
+	var nextDayLow    = document.getElementById("nextDayLow");
+	var nextDayWeath  = document.getElementById("nextDayWeath");
+	var nextDayLabel  = document.getElementById("nextDayLabel");
+	
+	var c = config || {};
+	
+	var ofc = c.Office  || "GID";
+	var gc  = c.Grid    || "94,81";
+	var st  = c.Station || "KJYR";	
+	var css = c.Styles  || "";
+	 
+	var forecast = getNWSForecastJSON(ofc, gc).properties.periods;
+	var conditions = getNWSConditionsJSON(st);
+		
+	var eveningOffset = 0;
+	if (!forecast[0].isDaytime)
+	{
+		eveningOffset = 1;
+		todayLabel.innerHTML = forecast[0].name;
+	}
+	else 
+	{
+		tonightLow.innerHTML = "/&nbsp;" + forecast[1].temperature + "&deg;F";
+	}
+	
+	if (conditions.properties.temperature.value !== null)
+	{
+		currentTemp.innerHTML   = CtoF(conditions.properties.temperature.value) + "&deg;F";
+		currentWeath.innerHTML  = conditions.properties.textDescription;
+	}
+	todayHigh.innerHTML     = forecast[0].temperature + "&deg;";
+	todayWeath.innerHTML    = wrapForecast(forecast[0].shortForecast);
+	
+	tomorrowHigh.innerHTML  = forecast[2-eveningOffset].temperature + "&deg;";
+	tomorrowLow.innerHTML   = "/&nbsp;" + forecast[3-eveningOffset].temperature + "&deg;F";
+	tomorrowWeath.innerHTML = wrapForecast(forecast[2-eveningOffset].shortForecast);
+	
+	nextDayHigh.innerHTML   = forecast[4-eveningOffset].temperature + "&deg;";
+	nextDayLow.innerHTML    = "/&nbsp;" + forecast[5-eveningOffset].temperature + "&deg;F";
+	if (forecast[4-eveningOffset].shortForecast.length > 34) {forecast[4-eveningOffset].shortForecast = forecast[4-eveningOffset].shortForecast.replace(' And', '<br>And');}
+	nextDayWeath.innerHTML  = wrapForecast(forecast[4-eveningOffset].shortForecast);
+	nextDayLabel.innerHTML  = forecast[4-eveningOffset].name.toUpperCase();
+
+	if (css.length > 0)
+	{
+		var s = document.createElement('style');
+		s.type = 'text/css';
+		s.innerText = css;
+		document.head.appendChild(s);
+	}
+	
+	// Need to cache this so NWS won't cut us off.
+	// They refresh data every 20 minutes, on :15, :35, and :55
+	// We want cache to expire just a couple minutes later (:17, :37, and :55)
+	//   (allowing 2 minutes for out-of-sync clocks or data delay)
+	// So compute how long until next refresh window
+	
+	var m = (new Date()).getMinutes();
+	if (m > 57) m = 77 - m;
+	else if (m > 37) m = 57 - m;
+	else if (m > 17) m = 37 - m;
+	else m = 17 - m;
+	m *= 60;
+	if (m <= 120) m += 1200; // if we're close to expiring anyway, skip a set
+	document.title = '{"ready_for_cache": true, "valid_for": ' + m + '}'
+}
+</script>
+
+<style>
+body {
+	width:1920px;
+	height:1080px;
+	border:0;margin:0;padding:0;
+	color:white;font-family:'Montserrat', sans-serif;
+}
+
+#currentTemp { font-size: 94pt;}
+#currentWeath {font-size: 68pt;text-transform:uppercase; }
+span.high { font-size: 48pt; }
+span.low { font-size: 32pt; }
+div.day { display: flex; flex-direction: row; width: 33%; }
+#forecast { width: 100%; display: flex; flex-direction: row;}
+.shortForecast {color:#D3DFF3;text-transform:uppercase;font-weight:bold;font-size:19pt;white-space:nowrap;}
+	
+body {}
+#conditions {background-color:#0047bade;height:55%;
+	position:relative;}
+#conditions .data-group {position:absolute;top:50%;left:100%;
+	transform:translate(-100%,-50%);padding-right:20%;}
+#forecast {background-color:rgba(0, 71, 186, 0.58);height:45%;}			
+#currentWeath {font-size: 50pt;color:#B4C9EB;display:block;}
+#forecast div.day {border: 1px solid white; vertical-align:center;}
+.day {padding-left:1%;padding-right:1%;position:relative;}
+.dayLabel {font-size:24pt;position:absolute;top:40%;translateY(-50%);text-transform:uppercase;}
+.day .data-group {
+	position:absolute;
+	top:50%;
+	left:100%;
+	transform:translate(-100%,-50%);
+	padding-right:1em;
+	text-align: right;
+}
+
+</style>
+</head>
+<body width="100%" height="100%"
+
+>
+<div id="conditions">
+	<div class="data-group">
+		<span id="currentTemp"></span>
+		<span id="currentWeath"></span>
+	</div>
+</div>
+<div id="forecast">
+	<div id="today" class="day">
+		<span id="todayLabel" class="dayLabel">TODAY</span>
+		<div class="data-group">
+			<div id="todayIcon" class="wIcon"></div>
+			<div class="temps"><span id="todayHigh" class="high"></span><span id="tonightLow" class="low"></span></div>
+			<span class="shortForecast" id="todayWeath"></span>
+		</div>
+	</div>
+	<div id="tomorrow" class="day">
+		<span class="dayLabel">TOMORROW</span>
+		<div class="data-group">
+			<div id="tomorrowIcon" class="wIcon"></div>
+			<div class="temps"><span id="tomorrowHigh" class="high"></span><span id="tomorrowLow" class="low"></span></div>
+			<span class="shortForecast" id="tomorrowWeath"></span>
+		</div>
+	</div>
+	<div id="nextDay" class="day">
+		<span id="nextDayLabel" class="dayLabel">NEXT DAY</span>
+		<div class="data-group">
+			<div id="nextDayIcon" class="wIcon"></div>
+			<div class="temps"><span id="nextDayHigh" class="high"></span><span id="nextDayLow" class="low"></span></div>
+			<span class="shortForecast" id="nextDayWeath"></span>
+		</div>
+	</div>
+</div>
+</body>
+</html>
