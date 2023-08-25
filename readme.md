@@ -21,11 +21,11 @@ https://api.weather.gov/points/{lattitude,longitude_from_google}
 
 _(Google's coordinates will have a space between Lat and Long that must be removed.)_
 
-Done correct, you will see a bunch of text in the browser in JSON format that will include values like this:
+Do this correctly and you will see a bunch of text in the browser in JSON format which includes values like this:
 
-   "gridId": "AAA",
-	"gridX": 01,
-	"gridY": 02,
+    "gridId": "AAA",
+    "gridX": 01,
+    "gridY": 02,
 	
 The actual values from gridID is the Office ID needed for the App, and gridX and gridY are the grid coordinates (entered as 01,02).
 
