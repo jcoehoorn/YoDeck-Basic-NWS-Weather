@@ -9,10 +9,10 @@ It is not as customizable as the default YoDeck weather app, but it's _MUCH_ fas
 
 When adding this app, it should be configured to use Chromium to render properly and as a Semi-static app to avoid hitting NWS API limits.
 
-To get local data, the NWS API needs three separate pieces of the data:
+To get local data, the NWS API needs three separate pieces of the information:
 
 1. The Office ID for your local NWS Office
-2. The grid coordinates within that office
+2. The grid coordinates within that office's area of responsibility
 3. The station ID for the nearest weather station
 
 To find this information, start from Google Maps and right-click on your location. This will show you the lattitude and longitude coordinates, and if you click them will copy them to the clipboard.
