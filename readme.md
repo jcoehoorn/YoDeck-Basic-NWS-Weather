@@ -19,7 +19,7 @@ To find this information, start from Google Maps and right-click on your locatio
 
 https://api.weather.gov/points/{lattitude,longitude_from_google}
 
-Google's coordinate will have a space between Lat and Long that must be removed.
+_(Google's coordinates will have a space between Lat and Long that must be removed.)_
 
 Done correct, you will see a bunch of text in the browser in JSON format that will include values like this:
 
