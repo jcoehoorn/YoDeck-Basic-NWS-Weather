@@ -27,7 +27,7 @@ Do this correctly and you will see a bunch of text in the browser in JSON format
     "gridX": 01,
     "gridY": 02,
 	
-The actual values from gridID is the Office ID needed for the App, and gridX and gridY are the grid coordinates (entered as 01,02).
+The actual value from gridID is the Office ID needed for the App, and gridX and gridY are the grid coordinates (entered as 01,02).
 
 To find the station, load a similar page at the following address using the data just collected:
 
