@@ -35,7 +35,7 @@ https://api.weather.gov/gridpoints/{GID}/{x},{y}/stations
 
 Look for JSON properties with the form `"stationIdentifier": "AAAA"`. The "AAAA" code is the station ID. You should have several of these in the results, but there is also a `name` property that will help you choose the most appropriate option.
 
-Finally, this was built to mimic a specific prior layout, but does allow for some customization by exposing a configuration option to provide your own CSS styles.
+This was built to mimic a specific prior layout, but does allow for some customization by exposing a configuration option to provide your own CSS styles.
 It's also a good idea to use this as just one item at the bottom of a larger layout, to include things like a location label or company logo.
 
 Finally, please note when testing that YoDecks seems to not correctly call init_widge() with the configured items in a basic web preview. You have to actually show this on a real monitor/player to see what it really looks like.
