@@ -2,7 +2,7 @@
 
 This shows current conditions and the forecast for three days (including the current day).
 
-*** Note: This is still very much a work-in-progres.***  
+***Note: This is still very much a work-in-progres.***  
 Use at your own risk.
 
 It is not as customizable as the default YoDeck weather app, but it's _MUCH_ faster to load, and seems to have more-reliable forecasts.
