@@ -2,6 +2,7 @@
   "fields": [
     "Station",
     "Grid",
+	"Radar",
 	"Styles"
   ],
   "schema": {
@@ -19,6 +20,13 @@
         "required"
       ]
     },
+	"Radar": {
+		"title": "Radar Station",
+		"type": "Text",
+		"validators": [
+			"required"
+		]
+	},
 	"Styles": {
 		"editorAttrs": {
 			"height":"80px"

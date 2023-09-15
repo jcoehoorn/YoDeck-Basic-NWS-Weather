@@ -87,6 +87,7 @@ function wrapForecast(forecast) {
 function init_widget(config) {
 	//alt(JSON.stringify(config));
 
+	var radar = document.getElementById("radarImg");
 	var currentTemp   = document.getElementById("currentTemp");
 	var currentWeath  = document.getElementById("currentWeath");
 	var todayHigh     = document.getElementById("todayHigh");
@@ -101,15 +102,18 @@ function init_widget(config) {
 	var nextDayWeath  = document.getElementById("nextDayWeath");
 	var nextDayLabel  = document.getElementById("nextDayLabel");
 	
+	
 	var c = config || {};
 	
 	var ofc = c.Office  || "GID";
 	var gc  = c.Grid    || "94,81";
 	var st  = c.Station || "KJYR";	
+	var rd  = c.Radar   || "KUEX";
 	var css = c.Styles  || "";
 	 
+	radar.src = "https://radar.weather.gov/ridge/standard/" + rd +  "_loop.gif";
 	var forecast = getNWSForecastJSON(ofc, gc).properties.periods;
-	var conditions = getNWSConditionsJSON(st);
+	var conditions = getNWSConditionsJSON(st);	
 		
 	var eveningOffset = 0;
 	if (!forecast[0].isDaytime)
@@ -199,13 +203,14 @@ body {}
 	padding-right:1em;
 	text-align: right;
 }
+#radarImg {height:100%;}
 
 </style>
 </head>
-<body width="100%" height="100%"
+<body width="100%" height="100%">
 
->
 <div id="conditions">
+	<img id="radarImg" />
 	<div class="data-group">
 		<span id="currentTemp"></span>
 		<span id="currentWeath"></span>
